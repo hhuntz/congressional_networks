@@ -32,15 +32,16 @@ def get_edge_list(sponsors_dict):
 def write_edge_csv(lst):
     print('writing csv file...')
     with open('data/edges.csv', 'w+') as f:
-        csv_writer = csv.writer(f)
-        csv_writer.writerows(lst)
-
+        for line in lst:
+            f.write(f"{line}\n")
     print('all done!')
+
 
 if __name__ == '__main__':
     with open('data/sponsors.json') as f:
         sponsors_json = f.read()
     sponsors = json.loads(sponsors_json)
     edge_dict = get_edge_list(sponsors)
-    edges = ['{k},{v}' for k,v in edge_dict.items()]
+    edges = [f'{k},{v}' for k,v in edge_dict.items()]
+    print(edges)
     write_edge_csv(edges)
