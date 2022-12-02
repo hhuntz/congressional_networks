@@ -46,6 +46,7 @@ def get_sponsor_data():
                     # error rate is about 1.5 in 10,000
                     errors += 1
                     print(f'skipped {bill} from {session} ------ {errors} errors')
+                    
     return sponsor_dict
 
 write_json(d):
