@@ -1,44 +1,49 @@
 import os
-# API Key for ProPublica: eEGHBzl0fTZ99JH0cOe2wTcoNWeaIgDpaSWeuG1n
-    # can enter an MOC and get party and other info for MOCs
-final_data = {}
+import json
 
+sponsor_dict = {}
+i = 0
+errors = 0
 for session in range(93, 117):
-    final_data[session] = {}
+    sponsor_dict[session] = {}
 
     path = os.path.join(os.path.dirname(__file__), f'data/{str(session)}')
 
-    for btype in os.listdir(path):
-        if '.DS_Store' in btype:
+    for bill_type in os.listdir(path):
+        if '.DS_Store' in bill_type:
             continue
-        subpath = os.path.join(path, btype)
-        if 'res' in btype:
-            continue
+        type_path = os.path.join(path, bill_type)
+        for bill in os.listdir(type_path):
+            bill_path = os.path.join(type_path, bill)
+            if '.DS_Store' in bill_path:
+                continue
+            try:
+                sponsor_dict[session][bill] = {}
+                data_path = bill_path + '/data.json'
+                with open(data_path, 'r') as f:
+                    j = json.loads(f.read())
+                    # get IDs for MOCs sponsoring the bill
+                    try:
+                        # older system was thomas id -- appending 't' at front
+                        sponsor_dict[session][bill]['sponsor'] = 't' + j['sponsor']['thomas_id']   
+                        sponsor_dict[session][bill]['cosponsors'] = ['t' + cosponsor['thomas_id'] for cosponsor in j['cosponsors']]
+                    except: 
+                        # newer system is bioguide id -- appending 'b' at front
+                        sponsor_dict[session][bill]['sponsor'] = 'b' + j['sponsor']['bioguide_id']   
+                        sponsor_dict[session][bill]['cosponsors'] = ['b' + cosponsor['bioguide_id'] for cosponsor in j['cosponsors']]
+                
+                i += 1
+                if i % 1000 == 0:
+                    print(f'{i} bills done') 
 
-        for file in os.listdir(subpath):
-            
-            billpath = os.path.join(subpath, file)
-
-            if  os.path.isdir(billpath):
-                try:
-                    bill_num = billpath.strip('/')[-1]
-                    final_data[session][bill_num]
-                    with open(billpath, 'r') as f:
-                        j = json.loads(f)
-
-
-
-                    print(billpath)
-
-
-
-                #     bd = prepare_bill(billpath, ses)
-                #     if bd.get('summary') is not None and bd.get('text') is not None:
-                #         final_dataset.append(bd)
-            
-                except:
-                    print('nope')
-
-    # with open('/data/final_data/final/final_data_{}.jsonl'.format(session), 'w') as f:
-    #     writer = jsonlines.Writer(f)
-    #     writer.write_all(final_dataset)
+            except:
+                # errors seem to be bills without sponsor info (saved as 'null' in the json)
+                # error rate is about 1.5 in 10,000
+                # ~324,000 total bills
+                errors += 1
+                print(f'skipped {bill} from {session} ------ {errors} errors')
+                
+print('writing JSON file')
+with open('data/sponsors.json', 'w+') as f:
+    dict_str = json.dumps(sponsor_dict)
+    f.write(dict_str)
