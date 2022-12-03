@@ -1,3 +1,14 @@
+'''
+These functions expect you to have 2 data sources in a subdirectory called 'data'
+    1. bill data in XML files via https://github.com/unitedstates/congress
+        or from propublica @ https://www.propublica.org/datastore/dataset/congressional-data-bulk-legislation-bills
+    2. data on Members of Congress from https://bioguide.congress.gov/search (download link in top right)
+You can uncomment code in main() to save more files along the way
+    Othwerwise, output is:
+        edges.csv, with rows as edges and weights between id nums for MOCs w/ weights as # of cosponsorships
+        moc_info.json, which contains info on each MOC by bioguide_id
+'''
+
 import json
 import csv
 import os
@@ -73,12 +84,24 @@ def get_edge_list(sponsors_dict):
             seen += 1
             if seen % 1000 == 0:
                 print (f'{seen} bills done -- length of edge_list is {len(edge_dict)}')
-    print('done making edge list')
-    return edge_dict
 
-def write_sponsors_json(d):
+    edge_list = edges = [f'{k},{v}' for k,v in edge_dict.items()]
+    print('done making edge list')
+    return edge_list
+
+def get_moc_dict():
+    moc_dict = {}
+    path = os.path.join(os.path.dirname(__file__), f'data/BioguideProfiles')
+    for moc_file in os.listdir(path):
+        data_path = path + '/' + moc_file
+        with open(data_path, 'r') as f:
+            j = json.loads(f.read())
+        moc_dict[moc_file.replace('.json', '')] = j
+    return moc_dict
+
+def write_json(d, file_path):
     print('writing JSON file')
-    with open('data/sponsors.json', 'w+') as f:
+    with open(file_path, 'w+') as f:
         dict_str = json.dumps(d)
         f.write(dict_str)
 
@@ -93,13 +116,15 @@ def write_edge_csv(lst):
 
 if __name__ == '__main__':
     sponsors = get_sponsor_data()
-    # write_json(sponsors)
+    # write_json(sponsors, 'data/sponsors.json')
 
     # with open('data/sponsors.json') as f:
     #     sponsors_json = f.read()
     # sponsors = json.loads(sponsors_json)
 
     edge_dict = get_edge_list(sponsors)
-    edges = [f'{k},{v}' for k,v in edge_dict.items()]
-
     write_edge_csv(edges)
+
+    moc_info_path = os.path.join(os.path.dirname(__file__), f'data/moc_info.json')
+    moc_dict = get_moc_dict()
+    write_json(moc_dict, moc_info_path)
