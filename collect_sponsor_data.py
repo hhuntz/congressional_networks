@@ -30,12 +30,12 @@ def get_sponsor_data():
                         # get IDs for MOCs sponsoring the bill
                         try:
                             # older system was thomas id -- appending 't' at front
-                            sponsor_dict[session][bill]['sponsor'] = 't' + j['sponsor']['thomas_id']   
-                            sponsor_dict[session][bill]['cosponsors'] = ['t' + cosponsor['thomas_id'] for cosponsor in j['cosponsors']]
+                            sponsor_dict[session][bill]['sponsor'] = j['sponsor']['thomas_id']   
+                            sponsor_dict[session][bill]['cosponsors'] = [cosponsor['thomas_id'] for cosponsor in j['cosponsors']]
                         except: 
                             # newer system is bioguide id -- appending 'b' at front
-                            sponsor_dict[session][bill]['sponsor'] = 'b' + j['sponsor']['bioguide_id']   
-                            sponsor_dict[session][bill]['cosponsors'] = ['b' + cosponsor['bioguide_id'] for cosponsor in j['cosponsors']]
+                            sponsor_dict[session][bill]['sponsor'] = j['sponsor']['bioguide_id']   
+                            sponsor_dict[session][bill]['cosponsors'] = [cosponsor['bioguide_id'] for cosponsor in j['cosponsors']]
                     
                     i += 1
                     if i % 1000 == 0:
