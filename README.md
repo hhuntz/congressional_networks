@@ -7,9 +7,11 @@ Bill cosponsorship is one way in which members of Congress communicate with each
 The <em>compile_data.py</em> file here expects you to have 2 data sources in a subdirectory called 'data'
 
 1. bill data in XML files via https://github.com/unitedstates/congressor from propublica @ https://www.propublica.org/datastore/dataset/congressional-data-bulk-legislation-bills
-2. data on Members of Congress from https://bioguide.congress.gov/search (download link in top right)
+2. data on Members of Congress from https://bioguide.congress.gov/search (download link in top right) -- this is included in the repo above
 
 You can uncomment code in main() to save more files along the way; otherwise, this file outputs 2 files that are used in the analysis notebook:
 
 1. edges.csv, with rows as edges and weights between id nums for MOCs w/ weights as # of cosponsorships
 2. moc_info.json, which contains info on each MOC by bioguide_id
+
+You can also skip the rest of this work and go straight to the file I used for analysis and visualization, which is in the <em>data</em> folder here and called MOC_features.csv. This is member-level data where each MOC has personal,political, and demographic information as well as scores for network measures such as pagerank and the bipartisan cosponsorship score mentioned above. 
